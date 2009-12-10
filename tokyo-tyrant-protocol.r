@@ -1,23 +1,27 @@
 REBOL
 [
-  Title: "Untitled"
-  Date: none
-  Name: none
-  Version: none
-  File: none
-  Home: none
-  Author: none
-  Owner: none
-  Rights: none
-  Needs: none
-  Tabs: none
-  Usage: none
-  Purpose: none
-  Comment: none
-  History: none
-  Language: none
-  Type: none
-  Content: none
+	Title: "Tokyo Tyrant Protocol"
+	Date: 10-Dec-2009
+	Version: 0.2.1
+	File: %tokyo-tyrant-protocol.r
+	Home: http://github.com/moechofe/ToktoTyrant-protocol-for-Rebol
+	Author: {martin mauchauffée}
+	Rights: {Copyleft}
+	Tabs: 2
+	Usage: none
+	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
+	Comment: {This is more a sanbox than a fully effective program.}
+	History: [
+		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! data.}] ]
+	Language: 'English
+	Library: [
+		level: 'intermediate
+		platform: 'all
+		type: [tool]
+		domain: [protocol database]
+		tested-under: [core 2.7.6.3.1 Windows XP]
+		license: 'Copyleft
+		see-also: [%tokyo-tyrant-driver.r %tokyo-tyrant-test.r] ]
 ]
 
 make root-protocol
