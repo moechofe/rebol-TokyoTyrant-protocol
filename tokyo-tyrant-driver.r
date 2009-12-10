@@ -13,7 +13,7 @@ REBOL
 	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.2.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
+		0.1.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
 	Language: 'English
 	Library: [
 		level: 'intermediate
