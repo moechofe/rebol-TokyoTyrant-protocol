@@ -1,5 +1,28 @@
 REBOL
 [
+	Title: "Tokyo Tyrant Driver"
+	Date: 10-Dec-2009
+	Version: 0.1.1
+	File: %tokyo-tyrant-driver.r
+	Home: http://github.com/moechofe/ToktoTyrant-protocol-for-Rebol
+	Author: {martin mauchauffée}
+	Rights: {Copyleft}
+	Tabs: 2
+	Needs: %tokyo-tyrant-protocol.r
+	Usage: none
+	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
+	Comment: {This is more a sanbox than a fully effective program.}
+	History: [
+		0.2.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
+	Language: 'English
+	Library: [
+		level: 'intermediate
+		platform: 'all
+		type: [tool]
+		domain: [protocol database]
+		tested-under: [core 2.7.6.3.1 Windows XP]
+		license: 'Copyleft
+		see-also: [%tokyo-tyrant-protocol.r %tokyo-tyrant-test.r] ]
 ]
 
 do %tokyo-tyrant-protocol.r
@@ -30,4 +53,3 @@ tokyo-tyrant-object: context
 			attempt [ do mold to-string value: copy port ]
 			to-integer value ] ]
 ]
-
