@@ -52,7 +52,7 @@ make root-protocol
 		magic: #{c8}
 
 		put: func [
-		"Send a PUT command to the server and return TRUE if success"
+		"Send a PUT command to the server and return TRUE if success."
 		port [port!] "The port connected to the server"
 		key [any-word!] "The key"
 		value "The value"	] [
@@ -65,7 +65,7 @@ make root-protocol
 			zero? to-integer to-binary/byte read-io port 1 ]
 
 		get: func [
-		"Send a GET command to the server and return TRUE if succes"
+		"Send a GET command to the server and return TRUE if success. Place the result in the buffer."
 		port [port!] "The port connected to the server"
 		key [any-word!] "The key"
 		/local length ] [
