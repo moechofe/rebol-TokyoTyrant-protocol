@@ -4,7 +4,7 @@ REBOL
 	Date: 11-Dec-2009
 	Version: 0.2.2
 	File: %tokyo-tyrant-protocol.r
-	Home: http://github.com/moechofe/ToktoTyrant-protocol-for-Rebol
+	Home: http://github.com/moechofe/TokyoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
 	Rights: {Copyleft}
 	Tabs: 2
