@@ -1,8 +1,8 @@
 REBOL
 [
 	Title: "Tokyo Tyrant Driver"
-	Date: 10-Dec-2009
-	Version: 0.1.1
+	Date: 11-Dec-2009
+	Version: 0.1.2
 	File: %tokyo-tyrant-driver.r
 	Home: http://github.com/moechofe/ToktoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
@@ -13,6 +13,7 @@ REBOL
 	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
+		0.1.2 [11-Dec-2009 {Support VSIZ commands.}]
 		0.1.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
 	Language: 'English
 	Library: [
