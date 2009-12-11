@@ -12,7 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.2.2 [11-Dec-2009 {support VSIZ, PUTKEEP, PUTCAT, PUTNR, OUT commands.}]
+		0.2.2 [11-Dec-2009 {support VSIZ, PUTKEEP, PUTCAT, PUTNR, OUT, MGET, ITERINIT, ITERNEXT, FWMKEYS and ADDINT commands.}]
 		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! data.}] ]
 	Language: 'English
 	Library: [
@@ -23,6 +23,9 @@ REBOL
 		tested-under: [core 2.7.6.3.1 Windows XP]
 		license: 'Copyleft
 		see-also: [%tokyo-tyrant-driver.r %tokyo-tyrant-test.r] ]
+	Todos: [
+		{Check or Limit the length of the key}
+		{For MGET, ITERNEXT and FWMKEYS: I'm not sure if they return all data only on success or always.} ]
 ]
 
 make root-protocol
@@ -83,11 +86,30 @@ make root-protocol
 				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
 				key ] ;kbuf:*
 			either zero? to-integer to-binary/byte read-io port 1 ;code:1
-			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port ;vsiz:4
-			  to-integer read-io port 4 true ] ;vbuf:*
+			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port ;vbuf:*
+			  to-integer read-io port 4 true ] ;vsiz:4
 			[ false ] ]
 
-		vsiz: func [ "Send a VSIZ command to the server and return TRUE is success. Place the result in the buffer."
+		mget: func [ "Send a MGET command to the server and return TRUE if success. Place the result in the buffer."
+		port [port!] "The port connected to the server."
+		key [path!] "The list of key."
+		/local k ] [
+			write-io port rejoin [
+				magic #{31} ;magic:2
+				to-binary length? key ;rnum:4
+				forall key [ to-binary length? k: to-binary/bytes to-word first key ;ksiz:4
+				             k ] ] ;kbuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ port/state/outBuffer: make hash! []
+			  loop to-integer read-io port 4 [ ;rnum:4
+					append port/state/outBuffer [
+						to-set-word to-binary/bytes read-io port ;kbuf:*
+						to-integer read-io port 4 ;ksiz:4
+						to-binary/bytes read-io port ;vbuf:*
+						to-integer read-io port 4 ] ] true ];vsiz:4
+			[ false ] ]
+
+		vsiz: func [ "Send a VSIZ command to the server and return TRUE if success. Place the result in the buffer."
 		port [port!] "The port connected to the server."
 		key [any-word!] "The key." ] [
 			write-io port rejoin [
@@ -96,6 +118,52 @@ make root-protocol
 				key ] ;kbuf:*
 			either zero? to-integer to-binary/byte read-io port 1 ;code:1
 			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port 4 true ] ;vsiz:4
+			[ false ] ]
+
+		iterinit: func [ "Send a ITERINIT command to the server and return TRUE if success."
+		port [port!] "The port connected to the server." ] [
+			write-io port rejoin [
+				magic #{50} ] ;magic:2
+			zero? to-integer to-binary/byte read-io port 1 ] ;code:1
+
+		iternext: func [ "Send a ITERNEXT command to the server and return TRUE if success. Place the result in the buffer."
+		port [port!] "The port connected to the server." ] [
+			write-io port rejoin [
+				magic #{51} ] ;magic:2
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ port/state/outBuffer: system/words/copy [
+			  to-set-word to-binary/bytes read-io port ;kbuf:*
+			  to-integer read-io port 4 ] true ] ;ksiz:4
+			[ false ] ]
+
+		fwmkeys: func [ "Send a FWMKEYS command to the server and return TRUE if success. Place the result in the buffer."
+		port [port!] "The port connected to the server."
+		prefix [any-word!] "The prefix of all keys."
+		max [integer!] "The maximum number of keys." ] [
+			write-io port rejoin [
+				magic #{58} ;magic:2
+				to-binary length? prefix: to-binary/bytes to-word prefix ;psiz:4
+				to-binary max ;max:4
+				prefix ] ;kbuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ port/state/outBuffer: make path! non
+			  loop to-integer read-io port 4 [ ;knum:4
+					append port/state/outBuffer [
+						to-word to-binary/bytes read-io port ;kbuf:*
+						to-integer read-io port 4 ] ] true ] ;ksiz:4
+			[ false ] ]
+
+		addint: func [ "Send a ADDINT command to the server and return TRUE if success. Place the result in the buffer."
+		port [port!] "The port connected to the server."
+		key [word!] "The key."
+		value [integer!] "The integer to add to the current value." ] [
+			write-io port rejoin [
+				magic #{60} ;magic:2
+				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+				to-binary value ;num:4
+				key ] ;kbuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port 4 true ] ;sum:4
 			[ false ] ]
 
 	];command
