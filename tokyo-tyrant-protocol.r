@@ -48,60 +48,55 @@ make root-protocol
 		return head value ]
 
 	command: context
-	[
-		magic: #{c8}
+	[	magic: #{c8}
 
-		put: func [
-		"Send a PUT command to the server and return TRUE if success."
-		port [port!] "The port connected to the server"
-		key [any-word!] "The key"
-		value "The value"	] [
+		put: func [ "Send a PUT or PUTKEEP command to the server and return TRUE if success."
+		port [port!] "The port connected to the server."
+		key [any-word!] "The key."
+		value "The value"
+		/keep /k "Send a PUTKEEP command as PUT." ] [
 			write-io port rejoin [
-				magic #{10}
-				to-binary length? key: to-binary/bytes to-word key
-				to-binary length? value: to-binary/bytes value
-				key
-				value ]
-			zero? to-integer to-binary/byte read-io port 1 ]
+				magic either any [ keep k ] [ #{11} ] [ #{10} ] ;magic:2
+				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+				to-binary length? value: to-binary/bytes value ;vsiz:4
+				key ;kbuf:*
+				value ] ;vbuf:*
+			zero? to-integer to-binary/byte read-io port 1 ] ;code:1
 
-		get: func [
-		"Send a GET command to the server and return TRUE if success. Place the result in the buffer."
-		port [port!] "The port connected to the server"
-		key [any-word!] "The key" ] [
+		get: func [ "Send a GET command to the server and return TRUE if success. Place the result in the buffer."
+		port [port!] "The port connected to the server."
+		key [any-word!] "The key." ] [
 			write-io port rejoin [
-				magic #{30}
-				to-binary length? key: to-binary/bytes to-word key
-				key ]
-			either zero? to-integer to-binary/byte read-io port 1
-			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port to-integer read-io port 4 true ]
-			[ false ]
-		]
+				magic #{30} ;magic:2
+				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+				key ] ;kbuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port ;vsiz:4
+			  to-integer read-io port 4 true ] ;vbuf:*
+			[ false ] ]
 
-		vsiz: func [
-		"Send a VSIZ command to the server and return TRUE is success. Place the result in the buffer."
-		port [port!] "The port connected to the server"
-		key [any-word!] "The key" ] [
+		vsiz: func [ "Send a VSIZ command to the server and return TRUE is success. Place the result in the buffer."
+		port [port!] "The port connected to the server."
+		key [any-word!] "The key." ] [
 			write-io port rejoin [
-				magic	#{38}
-				to-binary length? key: to-binary/bytes to-word key
-				key ]
-			either zero? to-integer to-binary/byte read-io port 1
-			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port 4 true ]
-			[ false ]
-		]
-	]
+				magic	#{38} ;magic:2
+				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+				key ] ;kbuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port 4 true ] ;vsiz:4
+			[ false ] ]
 
-	write-io: func [
-	"Write a command to the server"
-	port [port!] "The port connected to the server"
-	command [binary!] "The packed command" ] [
+	];command
+
+	write-io: func [ "Write a command to the server."
+	port [port!] "The port connected to the server."
+	command [binary!] "The packed command." ] [
 		net-utils/net-log reform [ "TOKYO write:" length? command "bytes ;" command ]
 		system/words/write-io port/sub-port command length? command ]
 
-	read-io: func [
-	"Read a result fropm the server"
-	port [port!] "The port connected to the server"
-	length [integer!] "The length of data to retrieve"
+	read-io: func [ "Read a result fropm the server."
+	port [port!] "The port connected to the server."
+	length [integer!] "The length of data to retrieve."
 	/local buffer result ] [ result: system/words/copy ""
 		while [ positive? length ] [
 			buffer: system/words/copy ""
