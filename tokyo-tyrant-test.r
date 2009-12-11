@@ -44,6 +44,8 @@ prin "PUT/GET (integer!) = " t/put 'a tmp: 255 print mold equal? tmp t/get/i 'a
 prin "PUT/GET (string!) = " t/put 'a tmp: copy "Ceci est une phrase" print mold equal? tmp t/get 'a
 prin "PUT/GET (binary!) = " t/put 'a tmp: copy to-binary reduce [ random 255 random 255 ] print mold equal? tmp t/get/b 'a
 prin "PUT/VSIZ (string!) = " t/put 'a tmp: copy "123" print mold equal? t/length? 'a length? tmp
-prin "PUTKEEP (integer!) = " t/put/keep 'a 61
+
+;FIXME need OUT
+;prin "PUTKEEP (integer!) = " t/put/keep 'a 61
 
 halt
