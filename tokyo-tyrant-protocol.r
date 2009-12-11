@@ -12,7 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.2.2 [11-Dec-2009 {support VSIZ commands.}]
+		0.2.2 [11-Dec-2009 {support VSIZ, PUTKEEP, PUTCAT commands.}]
 		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! data.}] ]
 	Language: 'English
 	Library: [
@@ -50,13 +50,14 @@ make root-protocol
 	command: context
 	[	magic: #{c8}
 
-		put: func [ "Send a PUT or PUTKEEP command to the server and return TRUE if success."
+		put: func [ "Send a PUT, PUTKEEP ot PUTCAT command to the server and return TRUE if success."
 		port [port!] "The port connected to the server."
 		key [any-word!] "The key."
 		value "The value"
-		/keep /k "Send a PUTKEEP command as PUT." ] [
+		/keep /k "Send a PUTKEEP command instead of PUT."
+		/concat /cat /c "Send a PUTCAT command instead of PUT." ] [
 			write-io port rejoin [
-				magic either any [ keep k ] [ #{11} ] [ #{10} ] ;magic:2
+				magic either any [keep k] [#{11}] [ either any [concat cat c] [#{12}] [#{10}] ] ;magic:2
 				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
 				to-binary length? value: to-binary/bytes value ;vsiz:4
 				key ;kbuf:*
@@ -110,14 +111,19 @@ make root-protocol
 	port [port!] "The port connected to the server."
 	data [string! block!] {The rules
 	 PUT = [key: value]
-	 PUTKEEP = [keep key: value]
+	 PUTKEEP = [attempt key: value]
+	 PUTCAT = [append key: value]
 	 GET = [:key]
 	 VSIZ = [length? :key]}
 	/local key value ] [ if block? data [ parse data [ some [
 
 		;PUTKEEP
-		'keep set key [set-word!] set value [integer! | any-string!]
+		'attempt set key [set-word!] set value [integer! | any-string!]
 			(if not command/put/keep port key value [throw make error! "error when keep puting"]) |
+
+		;PUTCAT
+		'append set key [set-word!] set value [integer! | any-string!]
+			(if not command/put/cat port key value [throw make error "error when concat puting"]) |
 
 		;VSIZ
 		'length? set key [get-word!]
