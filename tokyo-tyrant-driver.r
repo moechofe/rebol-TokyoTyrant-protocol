@@ -13,7 +13,7 @@ REBOL
 	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.1.2 [11-Dec-2009 {Support VSIZ commands.}]
+		0.1.2 [11-Dec-2009 {Support VSIZ and PUTKEEP commands.}]
 		0.1.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
 	Language: 'English
 	Library: [
@@ -36,8 +36,7 @@ tokyo-tyrant-object: context
 	set 'tokyo-tyrant func [ url [url!] /local object ]
 	[ make tokyo-tyrant-object [ port: open server-url: url ] ]
 
-	put: func [
-	"Put or keep a value to the server identified by a key."
+	put: func [ "Put or keep a value to the server identified by a key."
 	key [word!] "The key."
 	value "The value."
 	/keep /k "Put and keep a value to the server."
@@ -46,8 +45,7 @@ tokyo-tyrant-object: context
 		if any [ keep k ] [ insert data [keep] ]
 		insert port data ]
 
-	get: func [
-	"Get a value from the server identified by a key."
+	get: func [ "Get a value from the server identified by a key."
 	key [word!] "The key."
 	/integer /int /i "Convert to integer."
 	/raw /binary /b "Do not convert, return a binary value."
@@ -59,8 +57,7 @@ tokyo-tyrant-object: context
 			attempt [ do mold to-string value: copy port ]
 			to-integer value ] ]
 
-	length?: func [
-	"Return the length of a value from the server identified by a key."
+	length?: func [ "Return the length of a value from the server identified by a key."
 	key [word!] "The key." ] [
 		insert port reduce [ 'length? to-get-word key ]
 		to-integer copy port ]
