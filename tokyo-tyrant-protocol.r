@@ -76,6 +76,19 @@ make root-protocol
 			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port to-integer read-io port 4 true ]
 			[ false ]
 		]
+
+		vsiz: func [
+		"Send a VSIZ command to the server and return TRUE is success. Place the result in the buffer."
+		port [port!] "The port connected to the server"
+		key [any-word!] "The key" ] [
+			write-io port rejoin [
+				magic	#{38}
+				to-binary length? key: to-binary/bytes to-word key
+				key ]
+			either zero? to-integer to-binary/byte read-io port 1
+			[ port/state/outBuffer: system/words/copy to-binary/bytes read-io port 4 true ]
+			[ false ]
+		]
 	]
 
 	write-io: func [
