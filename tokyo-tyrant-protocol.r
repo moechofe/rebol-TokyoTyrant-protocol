@@ -67,8 +67,7 @@ make root-protocol
 		get: func [
 		"Send a GET command to the server and return TRUE if success. Place the result in the buffer."
 		port [port!] "The port connected to the server"
-		key [any-word!] "The key"
-		/local length ] [
+		key [any-word!] "The key" ] [
 			write-io port rejoin [
 				magic #{30}
 				to-binary length? key: to-binary/bytes to-word key
