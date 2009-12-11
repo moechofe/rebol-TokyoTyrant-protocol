@@ -12,8 +12,8 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.2.2 [11-Dec-2009 {support VSIZ, PUTKEEP, PUTCAT, PUTNR, OUT, MGET, ITERINIT, ITERNEXT, FWMKEYS and ADDINT commands.}]
-		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! data.}] ]
+		0.2.2 [11-Dec-2009 {Support VSIZ, PUTKEEP, PUTCAT, PUTNR commands^/Adding func! for OUT, MGET, ITERINIT, ITERNEXT, FWMKEYS, ADDINT commands.}]
+		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! datatype!.}] ]
 	Language: 'English
 	Library: [
 		level: 'intermediate
@@ -192,6 +192,7 @@ make root-protocol
 	 PUT = [key: value]
 	 PUTKEEP = [attempt key: value]
 	 PUTCAT = [append key: value]
+	 PUTNR = [noerror key: value]
 	 GET = [:key]
 	 VSIZ = [length? :key]}
 	/local key value ] [ if block? data [ parse data [ some [
@@ -203,6 +204,10 @@ make root-protocol
 		;PUTCAT
 		'append set key [set-word!] set value [integer! | any-string!]
 			(if not command/put/cat port key value [throw make error "error when concat puting"]) |
+
+		;PUTNR
+		['noerror | 'no-error] set key [set-word!] set value [integer! | any-string!]
+			(if not command/put/nr port key value [throw make error "error when no-response puting"]) |
 
 		;VSIZ
 		'length? set key [get-word!]
