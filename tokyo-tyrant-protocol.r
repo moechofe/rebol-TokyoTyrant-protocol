@@ -1,8 +1,8 @@
 REBOL
 [
 	Title: "Tokyo Tyrant Protocol"
-	Date: 10-Dec-2009
-	Version: 0.2.1
+	Date: 11-Dec-2009
+	Version: 0.2.2
 	File: %tokyo-tyrant-protocol.r
 	Home: http://github.com/moechofe/ToktoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
@@ -12,6 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
+		0.2.2 [11-Dec-2009 {support VSIZ commands.}]
 		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! data.}] ]
 	Language: 'English
 	Library: [
@@ -31,8 +32,7 @@ make root-protocol
 	port-id: 1978
 	port-flags: system/standard/port-flags/pass-thru or 32
 
-	to-binary: func [
-	"Convert value to binary value^/^- Return one or more 32bits binary values"
+	to-binary: func [ "Convert value to binary value^/^- Return one or more 32bits binary values"
 	value [integer! word! binary! string!] "The value to convert"
 	/bytes "Return one 8bits value"
 	/byte "Return one or more 8bits value"
