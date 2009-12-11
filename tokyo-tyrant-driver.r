@@ -41,10 +41,12 @@ tokyo-tyrant-object: context
 	value "The value."
 	/keep /k "Put a value only if the key isn't exists."
 	/concat /cat /c "Concat a value with an existing key."
+	/noerror /no-error /nr "Do not wait for a response from server, always return TRUE."
 	/local data ] [
 		data: system/words/copy reduce [ to-set-word key value ]
 		either any [keep k]	[ insert data [attempt] ] ;PUTKEEP
-		[ if any [concat cat c] [ insert data [append] ] ] ;PUCAT
+		[ either any [concat cat c] [ insert data [append] ] ;PUTCAT
+		[ if any [noerror no-error nr] [ insert data [noerror] ] ] ] ;PUTNR
 		insert port data ]
 
 	get: func [ "Get a value identified by a key."
