@@ -57,7 +57,7 @@ tokyo-tyrant-object: context
 			attempt [ do mold to-string value: copy port ]
 			to-integer value ] ]
 
-	length?: func [ "Return the length of a value from the server identified by a key."
+	length?: func [ "Return the length of a value identified by a key."
 	key [word!] "The key." ] [
 		insert port reduce [ 'length? to-get-word key ]
 		to-integer copy port ]
