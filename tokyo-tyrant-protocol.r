@@ -12,7 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.2.2 [11-Dec-2009 {support VSIZ, PUTKEEP, PUTCAT and PUTNR commands.}]
+		0.2.2 [11-Dec-2009 {support VSIZ, PUTKEEP, PUTCAT, PUTNR, OUT commands.}]
 		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! data.}] ]
 	Language: 'English
 	Library: [
@@ -65,6 +65,15 @@ make root-protocol
 				value ] ;vbuf:*
 			either any [ noresponse nr ] [ true ]
 			[ zero? to-integer to-binary/byte read-io port 1 ] ] ;code:1
+
+		out: func [ "Send a OUT command to the server and return TRUE if success."
+		port [port!] "The port connected to the server."
+		key [any-word!] "The key." ] [
+			write-io port rejoin [
+				magic #{20} ;magic:2
+				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+				key ] ;kbuf:*
+			zero? to-integer to-binary/byte read-io port 1 ]
 
 		get: func [ "Send a GET command to the server and return TRUE if success. Place the result in the buffer."
 		port [port!] "The port connected to the server."
