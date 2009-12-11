@@ -114,8 +114,12 @@ make root-protocol
 	insert: func [
 	"Send command to the port connected with the server"
 	port [port!] "The port connected to the server"
-	data [string! block!] "The rules^/^- PUT = [key: value]^/^- GET = [:key]"
-	/local key value ] [ if block? data [ parse data [ any [
+	data [string! block!] {The rules
+	 PUT = [key: value]
+	 GET = [:key]
+	 VSIZ = [length? :key]}
+	/local key value ] [ if block? data [ parse data [ some [
+		'length? set key [get-word!] (if not command/vsiz port key [throw make error! "error when vsizing"]) | ;VSIZ
 		set key [set-word!] set value [integer! | any-string!] (if not command/put port key value [throw make error! "error when puting"]) | ;PUT
 		set key [get-word!] (if not command/get port key [throw make error! "error when getting"]) ] ] ] ] ;GET
 
