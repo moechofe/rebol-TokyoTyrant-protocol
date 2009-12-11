@@ -106,21 +106,33 @@ make root-protocol
 		net-utils/net-log reform [ "TOKYO read:" length? result "bytes ;" to-binary/bytes result ]
 		to-binary result ]
 
-	insert: func [
-	"Send command to the port connected with the server"
-	port [port!] "The port connected to the server"
+	insert: func [ "Send command to the port connected with the server."
+	port [port!] "The port connected to the server."
 	data [string! block!] {The rules
 	 PUT = [key: value]
+	 PUTKEEP = [keep key: value]
 	 GET = [:key]
 	 VSIZ = [length? :key]}
 	/local key value ] [ if block? data [ parse data [ some [
-		'length? set key [get-word!] (if not command/vsiz port key [throw make error! "error when vsizing"]) | ;VSIZ
-		set key [set-word!] set value [integer! | any-string!] (if not command/put port key value [throw make error! "error when puting"]) | ;PUT
-		set key [get-word!] (if not command/get port key [throw make error! "error when getting"]) ] ] ] ] ;GET
 
-	copy: func [
-	"Return buffered received data from the port connected with the server"
-	port [port!] "The port connected to the server"
+		;PUTKEEP
+		'keep set key [set-word!] set value [integer! | any-string!]
+			(if not command/put/keep port key value [throw make error! "error when keep puting"]) |
+
+		;VSIZ
+		'length? set key [get-word!]
+			(if not command/vsiz port key [throw make error! "error when vsizing"]) |
+
+		;PUT
+		set key [set-word!] set value [integer! | any-string!]
+			(if not command/put port key value [throw make error! "error when puting"]) |
+
+		; GET
+		set key [get-word!]
+			(if not command/get port key [throw make error! "error when getting"]) ] ] ] ]
+
+	copy: func [ "Return buffered received data from the port connected with the server."
+	port [port!] "The port connected to the server."
 	/result	] [ port/state/outBuffer ]
 
 	net-utils/net-install TOKYO self 1978
