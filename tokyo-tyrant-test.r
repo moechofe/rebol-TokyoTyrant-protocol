@@ -13,7 +13,7 @@ REBOL
 	Purpose: {This is a script to test the implementation of the ToykyoTyrant protocol via the TykyoTyrant driver.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.1.4 [11-Dec-2009 {Add test for VSIZ.}]
+		0.1.4 [11-Dec-2009 {Add test for VSIZ and PUTCAT.}]
 		0.1.3 [10-Dec-2009 {Add test for PUT and GET integer!, string!, binary!.}] ]
 	Language: 'English
 	Library: [
@@ -44,6 +44,7 @@ prin "PUT/GET (integer!) = " t/put 'a tmp: 255 print mold equal? tmp t/get/i 'a
 prin "PUT/GET (string!) = " t/put 'a tmp: copy "Ceci est une phrase" print mold equal? tmp t/get 'a
 prin "PUT/GET (binary!) = " t/put 'a tmp: copy to-binary reduce [ random 255 random 255 ] print mold equal? tmp t/get/b 'a
 prin "PUT/VSIZ (string!) = " t/put 'a tmp: copy "123" print mold equal? t/length? 'a length? tmp
+prin "PUT/PUTCAT/GET (string!) = " t/put 'a "Prome" t/put/cat 'a "nade" print mold equal? "Promenade" t/get 'a
 
 ;FIXME need OUT
 ;prin "PUTKEEP (integer!) = " t/put/keep 'a 61
