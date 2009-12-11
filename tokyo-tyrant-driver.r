@@ -5,7 +5,7 @@ REBOL
 	Version: 0.1.1
 	File: %tokyo-tyrant-driver.r
 	Home: http://github.com/moechofe/ToktoTyrant-protocol-for-Rebol
-	Author: {martin mauchauffée}
+	Author: {martin mauchauffÃ©e}
 	Rights: {Copyleft}
 	Tabs: 2
 	Needs: %tokyo-tyrant-protocol.r
