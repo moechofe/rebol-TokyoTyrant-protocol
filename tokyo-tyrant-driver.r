@@ -37,9 +37,14 @@ tokyo-tyrant-object: context
 	[ make tokyo-tyrant-object [ port: open server-url: url ] ]
 
 	put: func [
-	"Put a value to the server identified by a key."
+	"Put or keep a value to the server identified by a key."
 	key [word!] "The key."
-	value "The value" ] [ insert port reduce [ to-set-word key value ] ]
+	value "The value."
+	/keep /k "Put and keep a value to the server."
+	/local data ] [
+		data: system/words/copy reduce [ to-set-word key value ]
+		if any [ keep k ] [ insert data [keep] ]
+		insert port data ]
 
 	get: func [
 	"Get a value from the server identified by a key."
