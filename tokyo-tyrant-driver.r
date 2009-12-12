@@ -1,8 +1,8 @@
 REBOL
 [
 	Title: "Tokyo Tyrant Driver"
-	Date: 11-Dec-2009
-	Version: 0.1.2
+	Date: 12-Dec-2009
+	Version: 0.2.2
 	File: %tokyo-tyrant-driver.r
 	Home: http://github.com/moechofe/TokyoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
@@ -13,6 +13,7 @@ REBOL
 	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
+		0.2.2 [12-Dec-2009 {Support PUTNR commands. Add a new driver to send query directly to protocol, convertion are also perform by the protocol.}]
 		0.1.2 [11-Dec-2009 {Support VSIZ, PUTKEEP and PUTCAT commands.}]
 		0.1.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
 	Language: 'English
@@ -47,7 +48,7 @@ tokyo-tyrant-object: context
 		either any [keep k]	[ insert data [attempt] ] ;PUTKEEP
 		[ either any [concat cat c] [ insert data [append] ] ;PUTCAT
 		[ if any [noerror no-error nr] [ insert data [noerror] ] ] ] ;PUTNR
-		insert port data ]
+		insert port data first copy port ]
 
 	get: func [ "Get a value identified by a key."
 	key [word!] "The key."
@@ -55,14 +56,22 @@ tokyo-tyrant-object: context
 	/raw /binary /b "Do not convert, return a binary value."
 	/local value ] [
 		insert port reduce [ to-get-word key ]
-		if any [ integer int i ] [ return to-integer copy port ]
-		if any [ raw binary b ] [ return copy port ]
+		if any [ integer int i ] [ return to-integer first copy port ]
+		if any [ raw binary b ] [ return first copy port ]
 		return any [
-			attempt [ do mold to-string value: copy port ]
+			attempt [ do mold to-string value: first copy port ]
 			to-integer value ] ]
 
 	length?: func [ "Return the length of a value identified by a key."
 	key [word!] "The key." ] [
 		insert port reduce [ 'length? to-get-word key ]
-		to-integer copy port ]
+		to-integer first copy port ]
 ]
+
+tokyo: func [ "Return a function to send query for a Tokyo Tyrant server."
+url [url!] "The URL of the server. Format: tykyo://localhost:1978" ] [ do compose/deep [
+	func [ "Send query to a Tokyo Tyrant server and receive result from it."
+	query [block!] {The query can be one or more of the followed format:
+		PUT = [key: value] Store a value identified by the key.
+		GET = [:key] Retrieve a value identified by the key.}
+	/local port ] [ port: open (url) insert port query copy port ] ] ]
