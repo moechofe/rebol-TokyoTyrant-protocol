@@ -13,7 +13,7 @@ REBOL
 	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-	  0.2.3 [24-Sep:2010 {Support PUTKEEP command. }
+	  0.2.3 [24-Sep-2010 {Support PUTKEEP command.}]
 		0.2.2 [12-Dec-2009 {Support PUTNR command. Add a new driver to send query directly to protocol, convertion are also perform by the protocol.}]
 		0.1.2 [11-Dec-2009 {Support VSIZ, PUTKEEP and PUTCAT commands.}]
 		0.1.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
@@ -74,6 +74,7 @@ tokyo: func [ "Return a function to send query for a Tokyo Tyrant server."
 url [url!] "The URL of the server. Format: tokyo://localhost:1978" ] [ do compose/deep [
 	func [ "Send query to a Tokyo Tyrant server and receive result from it."
 	query [block!] {The query can be one or more of the followed format:
-		PUT = [key: value] Store a value identified by the key.
-		GET = [:key] Retrieve a value identified by the key.}
+		[key: value] Store a value identified by the key.
+		[:key] Retrieve a value identified by the key.
+		[attempt key: value] Try to store a value if the key do not already exists.}
 	/local port ] [ port: open (url) insert port query copy port ] ] ]
