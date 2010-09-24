@@ -47,7 +47,7 @@ trace/net off
 ;prin "object style PUT/VSIZ (string!) = " t/put 'a tmp: copy "123" print mold equal? t/length? 'a length? tmp
 ;prin "object style PUT/PUTCAT/GET (string!) = " t/put 'a "Prome" t/put/cat 'a "nade" print mold equal? "Promenade" t/get 'a
 
-tt1: tokyo tokyo://moechofe.info:1978
+tt1: tokyo tokyo://localhost:1978
 
 prin "query style PUT/GET (integer!,string!,binary!) = " tt1 [ a: 123 b: "chocolat" c: #{c810} ] print mold equal? [ 123 "chocolat" #{c810} ] tt1 [ integer! :a string! :b binary! :c ]
 prin "query style PUT/GET (path!) = " tt1 [d: a/b/c/d/e] print mold equal? 'a/b/c/d/e first tt1 [ :d ]

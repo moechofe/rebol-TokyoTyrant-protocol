@@ -69,7 +69,7 @@ tokyo-tyrant-object: context
 ]
 
 tokyo: func [ "Return a function to send query for a Tokyo Tyrant server."
-url [url!] "The URL of the server. Format: tykyo://localhost:1978" ] [ do compose/deep [
+url [url!] "The URL of the server. Format: tokyo://localhost:1978" ] [ do compose/deep [
 	func [ "Send query to a Tokyo Tyrant server and receive result from it."
 	query [block!] {The query can be one or more of the followed format:
 		PUT = [key: value] Store a value identified by the key.
