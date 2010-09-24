@@ -28,7 +28,6 @@ REBOL
 ]
 
 do %tokyo-tyrant-driver.r
-;trace/net on
 
 ; Launching the server :
 ; on-memory hash database = ttserver *
