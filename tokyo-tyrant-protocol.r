@@ -22,6 +22,7 @@ REBOL
 		type: [tool]
 		domain: [protocol database]
 		tested-under: [core 2.7.6.3.1 Windows XP]
+		tested-under: [core 2.7.7.4.2 Ubuntu]
 		license: 'Copyleft
 		see-also: [%tokyo-tyrant-driver.r %tokyo-tyrant-test.r] ]
 	Todos: [
