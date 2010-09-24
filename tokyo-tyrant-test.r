@@ -13,7 +13,7 @@ REBOL
 	Purpose: {This is a script to test the implementation of the ToykyoTyrant protocol via the TykyoTyrant driver.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.2.1 [12-Dec-2009 {Add test fot the query style.}]
+		0.2.1 [12-Dec-2009 {Add test for the query style.}]
 		0.1.4 [11-Dec-2009 {Add test for VSIZ and PUTCAT.}]
 		0.1.3 [10-Dec-2009 {Add test for PUT and GET integer!, string!, binary!.}] ]
 	Language: 'English
