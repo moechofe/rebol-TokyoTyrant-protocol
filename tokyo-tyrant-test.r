@@ -28,7 +28,6 @@ REBOL
 ]
 
 do %tokyo-tyrant-driver.r
-trace/net off
 ;trace/net on
 
 ; Launching the server :
@@ -49,8 +48,19 @@ trace/net off
 
 tt1: tokyo tokyo://localhost:1978
 
-prin "query style PUT/GET (integer!,string!,binary!) = " tt1 [ a: 123 b: "chocolat" c: #{c810} ] print mold equal? [ 123 "chocolat" #{c810} ] tt1 [ integer! :a string! :b binary! :c ]
-prin "query style PUT/GET (path!) = " tt1 [d: a/b/c/d/e] print mold equal? 'a/b/c/d/e first tt1 [ :d ]
+prin "query style: PUT/GET (integer!,string!,binary!) "
+tt1 [ a: 123 b: "chocolat" c: #{c810} ]
+print mold equal? [ 123 "chocolat" #{c810} ] tt1 [ integer! :a string! :b binary! :c ]
+
+prin "query style: PUT/GET (path!) = "
+tt1 [d: a/b/c/d/e]
+print mold equal? 'a/b/c/d/e first tt1 [ :d ]
+
+prin "query style: PUT/GET/PUTKEEP/GET (string!) "
+tt1 [ e: 456 ]
+print mold equal? 456 first tt1 [ integer! :e ]
+print mold error? try [	tt1 [ attempt e: 789 ] ]
+print mold equal? 456 first tt1 [ integer! :e ]
 
 ;FIXME need OUT
 ;prin "PUTKEEP (integer!) = " t/put/keep 'a 61
