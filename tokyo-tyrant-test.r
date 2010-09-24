@@ -38,14 +38,6 @@ do %tokyo-tyrant-driver.r
 ; fixed-length database = ttserver <path/file>.tcf
 ; table database = ttserver <path/file>.tct
 
-;delete this
-;t: tokyo-tyrant tokyo://moechofe.info:1978
-;prin "object style PUT/GET (integer!) = " t/put 'a tmp: 255 print mold equal? tmp t/get 'a
-;prin "object style PUT/GET (string!) = " t/put 'a tmp: copy "Ceci est une phrase" print mold equal? tmp t/get 'a
-;prin "object style PUT/GET (binary!) = " t/put 'a tmp: copy to-binary reduce [ random 255 random 255 ] print mold equal? tmp t/get/b 'a
-;prin "object style PUT/VSIZ (string!) = " t/put 'a tmp: copy "123" print mold equal? t/length? 'a length? tmp
-;prin "object style PUT/PUTCAT/GET (string!) = " t/put 'a "Prome" t/put/cat 'a "nade" print mold equal? "Promenade" t/get 'a
-
 tt1: tokyo tokyo://localhost:1978
 
 prin "query style: PUT/GET (integer!,string!,binary!) "
@@ -61,8 +53,5 @@ tt1 [ e: 456 ]
 print mold equal? 456 first tt1 [ integer! :e ]
 print mold error? try [	tt1 [ attempt e: 789 ] ]
 print mold equal? 456 first tt1 [ integer! :e ]
-
-;FIXME need OUT
-;prin "PUTKEEP (integer!) = " t/put/keep 'a 61
 
 halt
