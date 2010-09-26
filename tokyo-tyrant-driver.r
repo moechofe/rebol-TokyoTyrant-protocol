@@ -13,7 +13,7 @@ REBOL
 	Purpose: {This is a front-end to send command to a ToykyoTyrant server.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-	  0.2.3 [24-Sep-2010 {Support PUTKEEP command.}]
+		0.2.3 [24-Sep-2010 {Support PUTKEEP command.}]
 		0.2.2 [12-Dec-2009 {Support PUTNR command. Add a new driver to send query directly to protocol, convertion are also perform by the protocol.}]
 		0.1.2 [11-Dec-2009 {Support VSIZ, PUTKEEP and PUTCAT commands.}]
 		0.1.1 [10-Dec-2009 {Support PUT and GET commands.}] ]
