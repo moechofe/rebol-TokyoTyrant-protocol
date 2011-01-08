@@ -38,7 +38,7 @@ c: make root-protocol
 	port-flags: system/standard/port-flags/pass-thru or 32
 
 	to-binary: func [ "Convert value to binary value^/^- Return one or more 32bits binary values"
-	value [integer! word! binary! any-string! any-block!] "The value to convert"
+	value [integer! word! binary! any-string! any-block! date!] "The value to convert"
 	/bytes "Return one 8bits value"
 	/byte "Return one or more 8bits value"
 	/local result ] [
@@ -46,6 +46,7 @@ c: make root-protocol
 		binary! []
 		integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
 		word! [ value: system/words/to-binary value ]
+		date! [ value: system/words/to-binary form value ]
 		string! [ value: system/words/to-binary system/words/copy value ] ]
 		[ value: system/words/to-binary mold value ]
 		either bytes
@@ -245,7 +246,7 @@ c: make root-protocol
 			 (if not command/vsiz port key [throw make error! "error when vsizing"]) |
 
 		;PUT
-		 set key [set-word!] set value [integer! | any-string! | any-block!]
+		 set key [set-word!] set value [integer! | any-string! | any-block! | date!]
 			(if not command/put port key value [throw make error! "error when puting"]) |
 
 		;GET

@@ -38,7 +38,11 @@ do %tokyo-tyrant-driver.r
 ; fixed-length database = ttserver <path/file>.tcf
 ; table database = ttserver <path/file>.tct
 
-tt1: tokyo tokyo://localhost:1978
+tt1: tokyo tokyo://localhost:1981
+
+probe tt1 [ :last-download ]
+
+halt
 
 prin "query style: PUT/GET (integer!,string!,binary!) "
 tt1 [ a: 123 b: "chocolat" c: #{c810} ]
