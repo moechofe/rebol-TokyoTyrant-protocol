@@ -38,24 +38,23 @@ do %tokyo-tyrant-driver.r
 ; fixed-length database = ttserver <path/file>.tcf
 ; table database = ttserver <path/file>.tct
 
-tt1: tokyo tokyo://localhost:1981
+tt1: tokyo tokyo://localhost:1978
 
-probe tt1 [ :last-download ]
-
-halt
-
-prin "query style: PUT/GET (integer!,string!,binary!) "
+prin "PUT/GET (integer!,string!,binary!) "
 tt1 [ a: 123 b: "chocolat" c: #{c810} ]
 print mold equal? [ 123 "chocolat" #{c810} ] tt1 [ integer! :a string! :b binary! :c ]
 
-prin "query style: PUT/GET (path!) = "
+prin "PUT/GET (path!) = "
 tt1 [d: a/b/c/d/e]
 print mold equal? 'a/b/c/d/e first tt1 [ :d ]
 
-prin "query style: PUT/GET/PUTKEEP/GET (string!) "
+prin "PUT/GET/PUTKEEP/GET (string!) "
 tt1 [ e: 456 ]
 print mold equal? 456 first tt1 [ integer! :e ]
 print mold error? try [	tt1 [ attempt e: 789 ] ]
 print mold equal? 456 first tt1 [ integer! :e ]
+
+prin "PUTNR/GET (string!) "
+print mold equal? "fallabs" first tt1 [ quick f: "fallabs" string! :f ]
 
 halt

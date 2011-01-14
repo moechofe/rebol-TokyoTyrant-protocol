@@ -77,14 +77,13 @@ c: make root-protocol
 		value "The value"
 		/keep /k "Send a PUTKEEP command instead of PUT."
 		/concat /cat /c "Send a PUTCAT command instead of PUT."
-		/noresponse /nr "Send a PUTNR command instead of PUT."] [
+		/noresponse /nr "Send a PUTNR command instead of PUT." ] [
 			write-io port rejoin [
 				magic either any [keep k] [#{11}] [ either any [concat cat c] [#{12}] [ either any [noresponse nr] [#{18}] [#{10}] ] ] ;magic:2
 				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
 				to-binary length? value: to-binary/bytes value ;vsiz:4
 				key ;kbuf:*
 				value ] ;vbuf:*
-			append port/state/outBuffer none
 			either any [ noresponse nr ] [ true ]
 			[ zero? to-integer to-binary/byte read-io port 1 ] ] ;code:1
 
@@ -224,7 +223,7 @@ c: make root-protocol
 	 PUT = [key: value]
 	 PUTKEEP = [attempt key: value]
 	 PUTCAT = [append key: value]
-	 PUTNR = [noerror key: value]
+	 PUTNR = [quick! key: value]
 	 GET = [:key]
 	 VSIZ = [length? :key]}
 	/local key value type ] [ port/state/outBuffer: system/words/copy [] if block? data [ parse data [ some [
@@ -238,7 +237,7 @@ c: make root-protocol
 			(if not command/put/cat port key value [throw make error "error when concat puting"]) |
 
 		;PUTNR
-		['noerror | 'no-error] set key [set-word!] set value [integer! | any-string!]
+		['quick | 'quick!] set key [set-word!] set value [integer! | any-string!]
 			 (if not command/put/nr port key value [throw make error "error when no-response puting"]) |
 
 		;VSIZ
