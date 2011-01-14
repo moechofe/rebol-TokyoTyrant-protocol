@@ -40,8 +40,7 @@ make root-protocol
 	to-binary: func [ "Convert value to binary value^/^- Return one or more 32bits binary values"
 	value [integer! word! binary! any-string! any-block!] "The value to convert"
 	/bytes "Return one 8bits value"
-	/byte "Return one or more 8bits value"
-	/local result ] [
+	/byte "Return one or more 8bits value" ] [
 		switch/default to-word type? value [
 		binary! []
 		integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
@@ -180,12 +179,36 @@ make root-protocol
 		value [integer!] "The integer to add to the current value." ] [
 			write-io port rejoin [
 				magic #{60} ;magic:2
-				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+				to-binary length? key: to-binary/bytes key ;ksiz:4
 				to-binary value ;num:4
 				key ] ;kbuf:*
 			either zero? to-integer to-binary/byte read-io port 1 ;code:1
 			[ append port/state/outBuffer to-binary/bytes read-io port 4 true ] ;sum:4
 			[ append port/state/outBuffer none false ] ]
+
+		misc: func [ "Send a MISC command with a specified function name to the server and return ..." ]
+		port [port!] "The port connected to the server."
+		name [word!] "The function name."
+		args [block!] "The list of arguments passed to the function." ] [
+			forall args [ change args to-binary/bytes first args ]
+			write-io port rejoin [
+				magic #{90} ;magic:2
+				to-binary length? name: to-binary/bytes name ;nsiz:4
+				to-binary 0 ;opts:4
+				to-binary length? args ;rnum:4
+				name ;nbuf:*
+				use [ buffer ] [ buffer: copy #{} forall args [
+					append buffer to-binary length? first args ;asiz:4
+					append buffer first args ] head buffer ] ] ;abuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ append
+
+
+			append/only port/state/outBuffer to-type to-binary/bytes read-io port ;vbuf:*
+			  to-integer read-io port 4 type true ] ;vsiz:4
+			[ append port/state/outBuffer none false ] ]
+		]
+
 
 	];command
 
