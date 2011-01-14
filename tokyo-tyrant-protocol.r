@@ -30,7 +30,7 @@ REBOL
 		{For MGET, ITERNEXT and FWMKEYS: I'm not sure if they return all data only on success or always.} ]
 ]
 
-c: make root-protocol
+make root-protocol
 [
 
 	scheme: 'Tokyo
@@ -261,3 +261,12 @@ c: make root-protocol
 
 	net-utils/net-install TOKYO self 1978
 ]
+
+tokyo: func [ "Return a function to send query for a Tokyo Tyrant server."
+url [url!] "The URL of the server. Format: tokyo://localhost:1978" ] [ do compose/deep [
+	func [ "Send query to a Tokyo Tyrant server and receive result from it."
+	query [block!] {The query can be one or more of the followed format:
+		[key: value] Store a value identified by the key.
+		[:key] Retrieve a value identified by the key.
+		[attempt key: value] Try to store a value if the key do not already exists.}
+	/local port ] [ port: open (url) insert port query copy port ] ] ]

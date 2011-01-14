@@ -28,7 +28,7 @@ REBOL
 		see-also: [%tokyo-tyrant-driver.r %tokyo-tyrant-protocol.r] ]
 ]
 
-do %tokyo-tyrant-driver.r
+do %tokyo-tyrant-protocol.r
 
 ; Launching the server :
 ; on-memory hash database = ttserver *
