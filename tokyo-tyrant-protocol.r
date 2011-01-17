@@ -12,7 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
-		0.3.5 [15-Jan-2011 {PUTNR do not return result anymore.}
+		0.3.5 [15-Jan-2011 {PUTNR do not return result anymore.}]
 		0.3.4 [12-Dec-2009 {Support for any-block! and any-string maybe. Add convertion func! and able to convert directly from the query. The point is to delete the object!/func! style of the driver and only offer the query style, more efficient. Able to store multiple value in the outBuffer. copy! now delete getted value. Query style able to manage multiple command and return multiple result.}]
 		0.2.2 [11-Dec-2009 {Support VSIZ, PUTKEEP, PUTCAT, PUTNR commands^/Adding func! for OUT, MGET, ITERINIT, ITERNEXT, FWMKEYS, ADDINT commands.}]
 		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! datatype!.}] ]
