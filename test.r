@@ -1,8 +1,8 @@
 REBOL
 [
 	Title: "Tokyo Tyrant Protocol/Driver test"
-	Date: 12-Dec-2009
-	Version: 0.2.1
+	Date: 17-Jan-2011
+	Version: 0.4.0
 	File: %tokyo-tyrant-test.r
 	Home: http://github.com/moechofe/TokyoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
@@ -13,6 +13,7 @@ REBOL
 	Purpose: {This is a script to test the implementation of the ToykyoTyrant protocol via the TykyoTyrant driver.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
+		0.4.0 [17-Jan-2011 {Restarting all tests.}]
 		0.3.0 [15-Jan-2011 {Add test for PUTNR. Only use query. Remove driver.}]
 		0.2.1 [12-Dec-2009 {Add test for the query style.}]
 		0.1.4 [11-Dec-2009 {Add test for VSIZ and PUTCAT.}]
@@ -41,8 +42,26 @@ do %tokyo-tyrant-protocol.r
 
 tt1: tokyo tokyo://localhost:1978
 
-prin "PUT/GET (integer!,string!,binary!) = "
-tt1 [ a: 123 b: "chocolat" c: #{c810} ]
+tt1 compose [
+	bitset: (charset [#"a" - #"z"])
+	binary: #{3A18427F 899AEFD8}
+	block: [123 data "hi"]
+	char: #"c"
+	date: 9-Jan-1979
+	decimal: +100'234'562.3782e1
+	email: luke@rebol.com
+
+	integer: -123'456
+	string: "chocolat"
+
+	path: p/a/t/h
+
+	url: http://localhost
+	word: 'word
+]
+
+halt
+
 print mold equal? [ 123 "chocolat" #{c810} ] tt1 [ integer! :a string! :b binary! :c ]
 
 prin "PUT/GET (path!) = "

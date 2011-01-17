@@ -1,8 +1,8 @@
 REBOL
 [
 	Title: "Tokyo Tyrant Protocol"
-	Date: 12-Dec-2009
-	Version: 0.3.5
+	Date: 17-Jan-2011
+	Version: 0.4.0
 	File: %tokyo-tyrant-protocol.r
 	Home: http://github.com/moechofe/TokyoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
@@ -12,6 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
+		0.4.0 [17-Jan-2011 {PUT store true string value now.}]
 		0.3.5 [15-Jan-2011 {PUTNR do not return result anymore.}]
 		0.3.4 [12-Dec-2009 {Support for any-block! and any-string maybe. Add convertion func! and able to convert directly from the query. The point is to delete the object!/func! style of the driver and only offer the query style, more efficient. Able to store multiple value in the outBuffer. copy! now delete getted value. Query style able to manage multiple command and return multiple result.}]
 		0.2.2 [11-Dec-2009 {Support VSIZ, PUTKEEP, PUTCAT, PUTNR commands^/Adding func! for OUT, MGET, ITERINIT, ITERNEXT, FWMKEYS, ADDINT commands.}]
@@ -81,9 +82,10 @@ make root-protocol
 			write-io port rejoin [
 				magic either any [keep k] [#{11}] [ either any [concat cat c] [#{12}] [ either any [noresponse nr] [#{18}] [#{10}] ] ] ;magic:2
 				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
-				to-binary length? value: to-binary/bytes value ;vsiz:4
+				to-binary length? value: form mold/flat value ;vsiz:4
 				key ;kbuf:*
 				value ] ;vbuf:*
+			probe reform ["PUT:" value]
 			either any [ noresponse nr ] [ true ]
 			[ zero? to-integer to-binary/byte read-io port 1 ] ] ;code:1
 
@@ -187,10 +189,11 @@ make root-protocol
 			[ append port/state/outBuffer to-binary/bytes read-io port 4 true ] ;sum:4
 			[ append port/state/outBuffer none false ] ]
 
-		misc: func [ "Send a MISC command with a specified function name to the server and return ..." ]
+		misc: func [ "Send a MISC command with a specified function name to the server and return ..."
 		port [port!] "The port connected to the server."
 		name [word!] "The function name."
-		args [block!] "The list of arguments passed to the function." ] [
+		args [block!] "The list of arguments passed to the function."
+		/local result ] [
 			forall args [ change args to-binary/bytes first args ]
 			write-io port rejoin [
 				magic #{90} ;magic:2
@@ -204,12 +207,9 @@ make root-protocol
 			either zero? to-integer to-binary/byte read-io port 1 ;code:1
 			[ result: make hash! []
 			  loop to-integer read-io port 4 [ ;rnum:4
-					append result [
-						to-set-word to-binary/bytes read-io port ;kbuf:*
-						to-integer read-io port 4 ;ksiz:4
-						to-binary/bytes read-io port ;vbuf:*
-						to-integer read-io port 4 ] ] append port/state/outBuffer result true ];vsiz:4
-			[ append port/state/outBuffer none false ] ]
+					probe read-io port read-io port 4 ;esiz:4 ;ebuf:*
+					append port/state/outBuffer result true ];vsiz:4
+			[ append port/state/outBuffer none false ] ] ]
 
 	];command
 
@@ -252,29 +252,31 @@ make root-protocol
 	 VSIZ = [length? :key]}
 	/local key value type ] [ port/state/outBuffer: system/words/copy [] if block? data [ parse data [ some [
 
+		;GET
+		(type: 'none!) opt [ set type insert-return-type-rules ] set key [get-word!]
+			(probe "GET" if not command/get port key type [throw make error! "error when getting"]) |
+
 		;PUTKEEP
-		'attempt set key [set-word!] set value [integer! | any-string!]
-			(if not command/put/keep port key value [throw make error! "error when keep puting"]) |
+		'attempt set key [set-word!] set value [any-type!]
+			(probe "PUTKEEP" if not command/put/keep port key value [throw make error! "error when keep puting"]) |
 
 		;PUTCAT
-		'append set key [set-word!] set value [integer! | any-string!]
-			(if not command/put/cat port key value [throw make error "error when concat puting"]) |
+		'append set key [set-word!] set value [any-type!]
+			(probe "PUTCAT" if not command/put/cat port key value [throw make error "error when concat puting"]) |
 
 		;PUTNR
-		['quick | 'quick!] set key [set-word!] set value [integer! | any-string!]
-			 (if not command/put/nr port key value [throw make error "error when no-response puting"]) |
+		['quick | 'quick!] set key [set-word!] set value [any-type!]
+			 (probe "PUTNR" if not command/put/nr port key value [throw make error "error when no-response puting"]) |
 
 		;VSIZ
 		'length? set key [get-word!]
-			 (if not command/vsiz port key [throw make error! "error when vsizing"]) |
+			 (probe "VSIZ" if not command/vsiz port key [throw make error! "error when vsizing"]) |
 
 		;PUT
-		 set key [set-word!] set value [integer! | any-string! | any-block! | date!]
-			(if not command/put port key value [throw make error! "error when puting"]) |
+		 set key [set-word!] set value [any-type!]
+			(probe "PUT" if not command/put port key value [throw make error! "error when puting"])
 
-		;GET
-		(type: 'none!) opt [ set type insert-return-type-rules ] set key [get-word!]
-			(if not command/get port key type [throw make error! "error when getting"]) ] ] ] ]
+		] ] ] ]
 
 	copy: func [ "Return buffered received data from the port connected with the server."
 	port [port!] "The port connected to the server."
@@ -286,11 +288,20 @@ make root-protocol
 	net-utils/net-install TOKYO self 1978
 ]
 
-tokyo: func [ "Return a function to send query for a Tokyo Tyrant server."
-url [url!] "The URL of the server. Format: tokyo://localhost:1978" ] [ do compose/deep [
+tokyo: func [ "Return a function to send query to a Tokyo Tyrant server."
+url [url!] "The URL of the server. Format: tokyo://localhost:1978"
+/table "Indiquate that the db is a table."
+/auto "Indiquate to close the port after each request." ] [ do compose/deep [
 	func [ "Send query to a Tokyo Tyrant server and receive result from it."
-	query [block!] {The query can be one or more of the followed format:
+	query [block!] {The query can be one of the followed syntax:
 		[key: value] Store a value identified by the key.
 		[:key] Retrieve a value identified by the key.
-		[attempt key: value] Try to store a value if the key do not already exists.}
-	/local port ] [ port: open (url) insert port query copy port ] ] ]
+		[attempt key: value] Try to store a value if the key do not already exists.
+		[quick! key: value] Store a value and do not wait for a response.}
+	/close "Close the connexion."
+	/local port ] [
+		port: []
+		if zero? length? port [ append port either table [ open/custom (url) [table] ][ open (url) ] ]
+		if close [ remove append return none ]
+		insert first port query
+		copy first port ] ] ]
