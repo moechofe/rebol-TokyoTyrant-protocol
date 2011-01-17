@@ -2,7 +2,7 @@ REBOL
 [
 	Title: "Tokyo Tyrant Protocol"
 	Date: 12-Dec-2009
-	Version: 0.3.4
+	Version: 0.3.5
 	File: %tokyo-tyrant-protocol.r
 	Home: http://github.com/moechofe/TokyoTyrant-protocol-for-Rebol
 	Author: {martin mauchauffée}
@@ -12,6 +12,7 @@ REBOL
 	Purpose: {This is a implementation of the ToykyoTyrant protocol for REBOL.}
 	Comment: {This is more a sanbox than a fully effective program.}
 	History: [
+		0.3.5 [15-Jan-2011 {PUTNR do not return result anymore.}]
 		0.3.4 [12-Dec-2009 {Support for any-block! and any-string maybe. Add convertion func! and able to convert directly from the query. The point is to delete the object!/func! style of the driver and only offer the query style, more efficient. Able to store multiple value in the outBuffer. copy! now delete getted value. Query style able to manage multiple command and return multiple result.}]
 		0.2.2 [11-Dec-2009 {Support VSIZ, PUTKEEP, PUTCAT, PUTNR commands^/Adding func! for OUT, MGET, ITERINIT, ITERNEXT, FWMKEYS, ADDINT commands.}]
 		0.2.1 [10-Dec-2009 {Support PUT and GET commands with integer!, string! and binary! datatype!.}] ]
@@ -22,15 +23,15 @@ REBOL
 		type: [tool]
 		domain: [protocol database]
 		tested-under: [core 2.7.6.3.1 Windows XP]
-		tested-under: [core 2.7.7.4.2 Ubuntu]
+		tested-under: [core 2.7.8.4.2 Ubuntu]
 		license: 'Copyleft
-		see-also: [%tokyo-tyrant-driver.r %tokyo-tyrant-test.r] ]
+		see-also: [%tokyo-tyrant-test.r] ]
 	Todos: [
 		{Check or Limit the length of the key}
 		{For MGET, ITERNEXT and FWMKEYS: I'm not sure if they return all data only on success or always.} ]
 ]
 
-c: make root-protocol
+make root-protocol
 [
 
 	scheme: 'Tokyo
@@ -38,7 +39,7 @@ c: make root-protocol
 	port-flags: system/standard/port-flags/pass-thru or 32
 
 	to-binary: func [ "Convert value to binary value^/^- Return one or more 32bits binary values"
-	value [integer! word! binary! any-string! any-block!] "The value to convert"
+	value [integer! word! binary! any-string! any-block! date!] "The value to convert"
 	/bytes "Return one 8bits value"
 	/byte "Return one or more 8bits value"
 	/local result ] [
@@ -46,6 +47,7 @@ c: make root-protocol
 		binary! []
 		integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
 		word! [ value: system/words/to-binary value ]
+		date! [ value: system/words/to-binary form value ]
 		string! [ value: system/words/to-binary system/words/copy value ] ]
 		[ value: system/words/to-binary mold value ]
 		either bytes
@@ -76,14 +78,13 @@ c: make root-protocol
 		value "The value"
 		/keep /k "Send a PUTKEEP command instead of PUT."
 		/concat /cat /c "Send a PUTCAT command instead of PUT."
-		/noresponse /nr "Send a PUTNR command instead of PUT."] [
+		/noresponse /nr "Send a PUTNR command instead of PUT." ] [
 			write-io port rejoin [
 				magic either any [keep k] [#{11}] [ either any [concat cat c] [#{12}] [ either any [noresponse nr] [#{18}] [#{10}] ] ] ;magic:2
 				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
 				to-binary length? value: to-binary/bytes value ;vsiz:4
 				key ;kbuf:*
 				value ] ;vbuf:*
-			append port/state/outBuffer none
 			either any [ noresponse nr ] [ true ]
 			[ zero? to-integer to-binary/byte read-io port 1 ] ] ;code:1
 
@@ -187,6 +188,25 @@ c: make root-protocol
 			[ append port/state/outBuffer to-binary/bytes read-io port 4 true ] ;sum:4
 			[ append port/state/outBuffer none false ] ]
 
+		misc: func [ "Send a MISC command to the server and return TRUE if success. Place the result in the buffer."
+		port [port!] "The port connected to the server."
+		name [word!] "The name of the function."
+		/local k result ] [
+			write-io port rejoin [
+				magic #{31} ;magic:2
+				to-binary length? key ;rnum:4
+				forall key [ to-binary length? k: to-binary/bytes to-word first key ;ksiz:4
+				             k ] ] ;kbuf:*
+			either zero? to-integer to-binary/byte read-io port 1 ;code:1
+			[ result: make hash! []
+			  loop to-integer read-io port 4 [ ;rnum:4
+					append result [
+						to-set-word to-binary/bytes read-io port ;kbuf:*
+						to-integer read-io port 4 ;ksiz:4
+						to-binary/bytes read-io port ;vbuf:*
+						to-integer read-io port 4 ] ] append port/state/outBuffer result true ];vsiz:4
+			[ append port/state/outBuffer none false ] ]
+
 	];command
 
 	write-io: func [ "Write a command to the server."
@@ -223,7 +243,7 @@ c: make root-protocol
 	 PUT = [key: value]
 	 PUTKEEP = [attempt key: value]
 	 PUTCAT = [append key: value]
-	 PUTNR = [noerror key: value]
+	 PUTNR = [quick! key: value]
 	 GET = [:key]
 	 VSIZ = [length? :key]}
 	/local key value type ] [ port/state/outBuffer: system/words/copy [] if block? data [ parse data [ some [
@@ -237,7 +257,7 @@ c: make root-protocol
 			(if not command/put/cat port key value [throw make error "error when concat puting"]) |
 
 		;PUTNR
-		['noerror | 'no-error] set key [set-word!] set value [integer! | any-string!]
+		['quick | 'quick!] set key [set-word!] set value [integer! | any-string!]
 			 (if not command/put/nr port key value [throw make error "error when no-response puting"]) |
 
 		;VSIZ
@@ -245,7 +265,7 @@ c: make root-protocol
 			 (if not command/vsiz port key [throw make error! "error when vsizing"]) |
 
 		;PUT
-		 set key [set-word!] set value [integer! | any-string! | any-block!]
+		 set key [set-word!] set value [integer! | any-string! | any-block! | date!]
 			(if not command/put port key value [throw make error! "error when puting"]) |
 
 		;GET
@@ -261,3 +281,12 @@ c: make root-protocol
 
 	net-utils/net-install TOKYO self 1978
 ]
+
+tokyo: func [ "Return a function to send query for a Tokyo Tyrant server."
+url [url!] "The URL of the server. Format: tokyo://localhost:1978" ] [ do compose/deep [
+	func [ "Send query to a Tokyo Tyrant server and receive result from it."
+	query [block!] {The query can be one or more of the followed format:
+		[key: value] Store a value identified by the key.
+		[:key] Retrieve a value identified by the key.
+		[attempt key: value] Try to store a value if the key do not already exists.}
+	/local port ] [ port: open (url) insert port query copy port ] ] ]
