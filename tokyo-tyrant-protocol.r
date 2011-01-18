@@ -40,14 +40,15 @@ make root-protocol
 	port-flags: system/standard/port-flags/pass-thru or 32
 
 	to-binary: func [ "Convert value to binary value^/^- Return one or more 32bits binary values"
-	value [integer! word! binary! any-string! any-block! date!] "The value to convert"
+	value [any-string!] "The value to convert"
+	;value [integer! word! binary! any-string! any-block! date!] "The value to convert"
 	/bytes "Return one 8bits value"
 	/byte "Return one or more 8bits value" ] [
 		switch/default to-word type? value [
-		binary! []
-		integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
-		word! [ value: system/words/to-binary value ]
-		date! [ value: system/words/to-binary form value ]
+		;binary! []
+		;integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
+		;word! [ value: system/words/to-binary value ]
+		;date! [ value: system/words/to-binary form value ]
 		string! [ value: system/words/to-binary system/words/copy value ] ]
 		[ value: system/words/to-binary mold value ]
 		either bytes
@@ -79,15 +80,22 @@ make root-protocol
 		/keep /k "Send a PUTKEEP command instead of PUT."
 		/concat /cat /c "Send a PUTCAT command instead of PUT."
 		/noresponse /nr "Send a PUTNR command instead of PUT." ] [
-			write-io port rejoin [
-				magic either any [keep k] [#{11}] [ either any [concat cat c] [#{12}] [ either any [noresponse nr] [#{18}] [#{10}] ] ] ;magic:2
-				to-binary length? key: to-binary/bytes to-word key ;ksiz:4
-				to-binary length? value: form mold/flat value ;vsiz:4
-				key ;kbuf:*
-				value ] ;vbuf:*
-			probe reform ["PUT:" value]
-			either any [ noresponse nr ] [ true ]
-			[ zero? to-integer to-binary/byte read-io port 1 ] ] ;code:1
+			either found? find port/state/custom 'table
+			[
+				if not object? value [ make error! "Need an object value for table database" ]
+				misc port 'put reduce [ form key value ]
+			]
+			[
+				write-io port rejoin [
+					magic either any [keep k] [#{11}] [ either any [concat cat c] [#{12}] [ either any [noresponse nr] [#{18}] [#{10}] ] ] ;magic:2
+					to-binary length? key: to-binary/bytes to-word key ;ksiz:4
+					to-binary length? value: form mold/flat value ;vsiz:4
+					key ;kbuf:*
+					value ] ;vbuf:*
+				probe reform ["PUT:" value]
+				either any [ noresponse nr ] [ true ]
+				[ zero? to-integer to-binary/byte read-io port 1 ] ;code:1
+			] ]
 
 		out: func [ "Send a OUT command to the server and return TRUE if success."
 		port [port!] "The port connected to the server."
@@ -194,7 +202,15 @@ make root-protocol
 		name [word!] "The function name."
 		args [block!] "The list of arguments passed to the function."
 		/local result ] [
-			forall args [ change args to-binary/bytes first args ]
+			probe args
+			forall args [ change args either object? first args
+			[ use [ key columns ] [ ; Object value
+				columns: #{}
+				foreach key next first first args [ probe key probe first args
+					append columns to-binary/bytes to-word key ; Key
+					append columns to-binary/bytes form mold/flat get in first args key ] ; Value
+				columns ] ]
+			[ to-binary/bytes first args ] ] ; Other values
 			write-io port rejoin [
 				magic #{90} ;magic:2
 				to-binary length? name: to-binary/bytes name ;nsiz:4
@@ -298,7 +314,7 @@ url [url!] "The URL of the server. Format: tokyo://localhost:1978"
 		[:key] Retrieve a value identified by the key.
 		[attempt key: value] Try to store a value if the key do not already exists.
 		[quick! key: value] Store a value and do not wait for a response.}
-	/close "Close the connexion."
+	/close "Close the connection."
 	/local port ] [
 		port: []
 		if zero? length? port [ append port either table [ open/custom (url) [table] ][ open (url) ] ]

@@ -40,8 +40,8 @@ do %tokyo-tyrant-protocol.r
 ; fixed-length database = ttserver <path/file>.tcf
 ; table database = ttserver <path/file>.tct
 
+{
 tt1: tokyo tokyo://localhost:1978
-
 tt1 compose [
 	bitset: (charset [#"a" - #"z"])
 	binary: #{3A18427F 899AEFD8}
@@ -50,15 +50,33 @@ tt1 compose [
 	date: 9-Jan-1979
 	decimal: +100'234'562.3782e1
 	email: luke@rebol.com
-
+	file: %file.r
+	;function: (does [])
+	get-word: :word
+	hash: (make hash! ['ha "ha" 'sh "sh"])
 	integer: -123'456
-	string: "chocolat"
-
+	image: (make image! 4x2)
+	issue: #888-555-1212
+	lit-path: 'l/i/t
+	lit-word: 'lit
+	logic: true
+	op: =
+	pair: 4x2
 	path: p/a/t/h
-
-	url: http://localhost
-	word: 'word
+	refinement: /refine
+	set-path: p/a/t/h:
+	set-word: word:
+	string: "chocolat"
+	tag: <html>
+	time: 09:14
+	tuple: 127.0.0.1
+	url: http://test:test@localhost
+	word: 'word::
 ]
+}
+
+tt1: tokyo/table tokyo://localhost
+tt1 compose [ t: (context [test: "test"]) ]
 
 halt
 
