@@ -40,14 +40,15 @@ make root-protocol
 	port-flags: system/standard/port-flags/pass-thru or 32
 
 	to-binary: func [ "Convert value to binary value^/^- Return one or more 32bits binary values"
-	value [any-string!] "The value to convert"
+	value [any-string! integer! binary! word!] "The value to convert"
 	;value [integer! word! binary! any-string! any-block! date!] "The value to convert"
 	/bytes "Return one 8bits value"
 	/byte "Return one or more 8bits value" ] [
+		probe type? value probe value
 		switch/default to-word type? value [
-		;binary! []
-		;integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
-		;word! [ value: system/words/to-binary value ]
+		binary! []
+		integer! [ value: system/words/to-binary load rejoin [ "#{" to-hex value "}" ] ]
+		word! [ value: system/words/to-binary value ]
 		;date! [ value: system/words/to-binary form value ]
 		string! [ value: system/words/to-binary system/words/copy value ] ]
 		[ value: system/words/to-binary mold value ]
@@ -80,7 +81,8 @@ make root-protocol
 		/keep /k "Send a PUTKEEP command instead of PUT."
 		/concat /cat /c "Send a PUTCAT command instead of PUT."
 		/noresponse /nr "Send a PUTNR command instead of PUT." ] [
-			either found? find port/state/custom 'table
+			probe port/state
+			either all [ series? port/state/custom found? find port/state/custom 'table ]
 			[
 				if not object? value [ make error! "Need an object value for table database" ]
 				misc port 'put reduce [ form key value ]

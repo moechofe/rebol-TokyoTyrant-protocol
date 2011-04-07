@@ -40,11 +40,10 @@ do %tokyo-tyrant-protocol.r
 ; fixed-length database = ttserver <path/file>.tcf
 ; table database = ttserver <path/file>.tct
 
-{
 tt1: tokyo tokyo://localhost:1978
 tt1 compose [
 	bitset: (charset [#"a" - #"z"])
-	binary: #{3A18427F 899AEFD8}
+	;binary: #{3A18427F 899AEFD8}
 	block: [123 data "hi"]
 	char: #"c"
 	date: 9-Jan-1979
@@ -73,12 +72,12 @@ tt1 compose [
 	url: http://test:test@localhost
 	word: 'word::
 ]
-}
-
-tt1: tokyo/table tokyo://localhost
-tt1 compose [ t: (context [test: "test"]) ]
 
 halt
+
+;tt1: tokyo/table tokyo://localhost
+;tt1 compose [ t: (context [test: "test"]) ]
+;halt
 
 print mold equal? [ 123 "chocolat" #{c810} ] tt1 [ integer! :a string! :b binary! :c ]
 
